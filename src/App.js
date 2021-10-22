@@ -3,37 +3,36 @@ import Tasks from './components/Tasks/Tasks';
 import NewTask from './components/NewTask/NewTask';
 import useHttp from './hooks/use-http';
 
-//==================================Notes========================================
+//==============================================Notes==================================================================
 //isLoading, error, sendRequest, transformTask - comes from useHttp hook
 //sendRequest - request function inside of custom hook
-//transformTask - for passing response data from custom hook
-//===============================================================================
+//transformTask - custom hook parameter 
+//=====================================================================================================================
 
 function App() {
 
   const [tasks, setTasks] = useState([]);
 
-  const transformTask = (taskObj) => {
-    const loadedTasks = [];
-
-    for (const taskKey in taskObj) { //pushing the object and its key values into an array [] (creating an array object)
-      loadedTasks.push({ id: taskKey, text: taskObj[taskKey].text });
-    }
-
-    setTasks(loadedTasks);
-  };
-
-  const {isLoading, error, sendRequest:fetchTasks} = useHttp(
-    {
-      url: "https://custom-hook-test-a6b1d-default-rtdb.europe-west1.firebasedatabase.app/tasks.json",
-    },
-    transformTask //this function will be called for us by the custom hook, whenever we get a response
+  const {isLoading, error, sendRequest:fetchTasks} = useHttp(); //this function will be called for us by the custom hook, whenever we get a response
     //comes from our custom hooks second parameter - applyData
-  );
 
   useEffect(() => {
-    fetchTasks();
-  }, []);
+    const transformTask = (taskObj) => { //taskObj is data passed in from custom hook 
+      const loadedTasks = [];
+
+      for (const taskKey in taskObj) {//pushing the object and its key values into an array [] (creating an array object)
+        loadedTasks.push({ id: taskKey, text: taskObj[taskKey].text });
+      }
+      setTasks(loadedTasks);
+    };
+
+    fetchTasks(
+      {
+        url: "https://custom-hook-test-a6b1d-default-rtdb.europe-west1.firebasedatabase.app/tasks.json",
+      },
+      transformTask
+    );
+  }, [fetchTasks]);
 
   const taskAddHandler = (task) => {
     setTasks((prevTasks) => prevTasks.concat(task));
